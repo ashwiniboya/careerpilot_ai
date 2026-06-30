@@ -61,6 +61,8 @@ coverage.xml
 *,cover
 .hypothesis/
 *.log
+push_to_github.py
+
 
 # OS-specific
 .DS_Store
