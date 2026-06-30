@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./vector_db:/app/vector_db
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000
+      - DATABASE_URL=sqlite:///data/careerpilot.db
+      - ENV=production
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: always

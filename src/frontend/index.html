@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerPilot AI — Your Autonomous Career Co-Pilot</title>
+  <meta name="description" content="CareerPilot AI is an autonomous multi-agent career platform that analyzes resumes, runs mock interviews, builds learning roadmaps, and tracks job applications — powered by Google Gemini 2.5." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" stroke="url(#lg1)" stroke-width="2"/>
+          <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="url(#lg1)" opacity="0.8"/>
+          <circle cx="20" cy="20" r="4" fill="white"/>
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00d4ff"/>
+              <stop offset="1" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="logo-text">CareerPilot</span>
+      <span class="logo-badge">AI</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-view="dashboard" id="nav-dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-view="chat" id="nav-chat">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>AI Assistant</span>
+        <span class="nav-badge">Live</span>
+      </a>
+      <a href="#" class="nav-item" data-view="resume" id="nav-resume">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+        <span>Resume Hub</span>
+      </a>
+      <a href="#" class="nav-item" data-view="interview" id="nav-interview">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/><path d="M8 20v-2a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v2"/>
+          <path d="M20 8v3m0 0l-2-2m2 2l2-2"/>
+        </svg>
+        <span>Mock Interview</span>
+      </a>
+      <a href="#" class="nav-item" data-view="roadmap" id="nav-roadmap">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18"/><circle cx="7" cy="6" r="2" fill="currentColor"/>
+          <circle cx="17" cy="12" r="2" fill="currentColor"/><circle cx="7" cy="18" r="2" fill="currentColor"/>
+        </svg>
+        <span>Roadmap</span>
+      </a>
+      <a href="#" class="nav-item" data-view="applications" id="nav-applications">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        <span>Applications</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar-mini" id="user-avatar-mini">U</div>
+      <div class="user-info-mini">
+        <span id="sidebar-user-name">User</span>
+        <span class="sidebar-user-email" id="sidebar-user-email">—</span>
+      </div>
+      <button class="logout-btn" id="logout-btn" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================== MAIN ============================== -->
+  <main class="main-content" id="main-content">
+
+    <!-- ── AUTH OVERLAY ── -->
+    <div class="auth-overlay" id="auth-overlay">
+      <div class="auth-card glass-card">
+        <div class="auth-logo">
+          <div class="logo-icon large">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="20" cy="20" r="18" stroke="url(#lg2)" stroke-width="2"/>
+              <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="url(#lg2)" opacity="0.8"/>
+              <circle cx="20" cy="20" r="4" fill="white"/>
+              <defs>
+                <linearGradient id="lg2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7c3aed"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h1>CareerPilot <span class="gradient-text">AI</span></h1>
+          <p class="auth-tagline">Your autonomous career co-pilot, powered by Gemini 2.5</p>
+        </div>
+
+        <!-- Tab switcher -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+          <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Sign Up</button>
+        </div>
+
+        <!-- Login form -->
+        <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+          </div>
+          <div class="auth-error hidden" id="login-error"></div>
+          <button type="submit" class="btn-primary" id="login-btn">
+            <span class="btn-text">Sign In</span>
+            <span class="btn-spinner hidden" id="login-spinner"></span>
+          </button>
+          <p class="auth-switch">No account? <a href="#" onclick="switchAuthTab('register')">Sign up free</a></p>
+        </form>
+
+        <!-- Register form -->
+        <form class="auth-form hidden" id="register-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Alice Candidate" required />
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" placeholder="Min 8 characters" required minlength="8" />
+          </div>
+          <div class="auth-error hidden" id="register-error"></div>
+          <button type="submit" class="btn-primary" id="register-btn">
+            <span class="btn-text">Create Account</span>
+            <span class="btn-spinner hidden" id="register-spinner"></span>
+          </button>
+          <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login')">Sign in</a></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── VIEW: DASHBOARD ── -->
+    <div class="view active" id="view-dashboard">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Welcome back — here's your career at a glance</p>
+        </div>
+        <div class="header-actions">
+          <div class="data-badge" id="data-source-badge">Demo Mode</div>
+          <button class="btn-secondary" onclick="refreshDashboard()">Refresh</button>
+        </div>
+      </header>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="glass-card kpi-card" id="kpi-ats">
+          <div class="kpi-icon cyan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-ats-value">—</div>
+            <div class="kpi-label">Latest ATS Score</div>
+            <div class="kpi-trend positive" id="kpi-ats-trend">—</div>
+          </div>
+          <div class="kpi-ring">
+            <svg class="ring-svg" viewBox="0 0 60 60">
+              <circle class="ring-bg" cx="30" cy="30" r="24" />
+              <circle class="ring-fill cyan-ring" cx="30" cy="30" r="24" id="ats-ring" style="stroke-dasharray: 0 151;" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="glass-card kpi-card" id="kpi-interview">
+          <div class="kpi-icon violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/><path d="M8 20v-2a4 4 0 0 1 8 0v2"/>
+            </svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-interview-value">—</div>
+            <div class="kpi-label">Interview Avg Score</div>
+            <div class="kpi-sub" id="kpi-interview-sub">— sessions</div>
+          </div>
+        </div>
+
+        <div class="glass-card kpi-card" id="kpi-roadmap">
+          <div class="kpi-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/><polyline points="17,6 23,6 23,12"/>
+            </svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-roadmap-value">—</div>
+            <div class="kpi-label">Roadmap Progress</div>
+            <div class="progress-bar-mini">
+              <div class="progress-fill" id="roadmap-progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card kpi-card" id="kpi-apps">
+          <div class="kpi-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-apps-value">—</div>
+            <div class="kpi-label">Active Applications</div>
+            <div class="kpi-sub" id="kpi-apps-sub">— total tracked</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-grid">
+        <div class="glass-card chart-card">
+          <div class="card-header">
+            <h3>ATS Score Trend</h3>
+            <span class="card-badge cyan">Live</span>
+          </div>
+          <div class="chart-area" id="ats-chart-area">
+            <canvas id="ats-chart" width="400" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card chart-card">
+          <div class="card-header">
+            <h3>Interview Performance</h3>
+            <span class="card-badge violet">Trend</span>
+          </div>
+          <div class="chart-area" id="interview-chart-area">
+            <canvas id="interview-chart" width="400" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Radar + Quick Actions -->
+      <div class="bottom-grid">
+        <div class="glass-card skills-card">
+          <div class="card-header">
+            <h3>Skill Radar</h3>
+            <span class="card-badge green">Current vs Target</span>
+          </div>
+          <div class="radar-wrapper">
+            <canvas id="skills-radar" width="280" height="280"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card quick-actions-card">
+          <div class="card-header"><h3>Quick Actions</h3></div>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="navigateTo('chat')">
+              <span class="action-icon">🤖</span>
+              <div>
+                <span class="action-title">Ask CareerPilot</span>
+                <span class="action-desc">Get instant career advice</span>
+              </div>
+            </button>
+            <button class="action-btn" onclick="navigateTo('resume')">
+              <span class="action-icon">📄</span>
+              <div>
+                <span class="action-title">Analyze Resume</span>
+                <span class="action-desc">Upload & get ATS score</span>
+              </div>
+            </button>
+            <button class="action-btn" onclick="navigateTo('interview')">
+              <span class="action-icon">🎤</span>
+              <div>
+                <span class="action-title">Mock Interview</span>
+                <span class="action-desc">Practice with AI interviewer</span>
+              </div>
+            </button>
+            <button class="action-btn" onclick="navigateTo('roadmap')">
+              <span class="action-icon">🗺️</span>
+              <div>
+                <span class="action-title">View Roadmap</span>
+                <span class="action-desc">Check your learning path</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: CHAT ── -->
+    <div class="view hidden" id="view-chat">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">AI Assistant</h1>
+          <p class="page-subtitle">Streaming chat powered by Gemini 2.5 Pro</p>
+        </div>
+        <div class="agent-indicator">
+          <span class="agent-dot" id="chat-agent-dot"></span>
+          <span id="chat-agent-name">orchestrator</span>
+        </div>
+      </header>
+
+      <div class="chat-layout">
+        <div class="glass-card chat-card">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-welcome">
+              <div class="welcome-icon">🚀</div>
+              <h3>Hello! I'm CareerPilot</h3>
+              <p>Ask me anything about your career — resume reviews, interview prep, salary insights, job matching, and more.</p>
+              <div class="suggestion-chips">
+                <button class="chip" onclick="sendSuggestion('Analyze my resume for a ML Engineer role')">📄 Resume Review</button>
+                <button class="chip" onclick="sendSuggestion('Start a mock interview for a Senior Software Engineer at Google')">🎤 Mock Interview</button>
+                <button class="chip" onclick="sendSuggestion('Build me a career roadmap to become a Staff Engineer in 12 months')">🗺️ Career Roadmap</button>
+                <button class="chip" onclick="sendSuggestion('What salary should I expect as a Senior ML Engineer in San Francisco?')">💰 Salary Insights</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+              <textarea
+                id="chat-input"
+                placeholder="Ask CareerPilot anything about your career…"
+                rows="1"
+                onkeydown="handleChatKey(event)"
+                oninput="autoResizeTextarea(this)"
+              ></textarea>
+              <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/>
+                </svg>
+              </button>
+            </div>
+            <div class="chat-hints">
+              <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: RESUME ── -->
+    <div class="view hidden" id="view-resume">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Resume Hub</h1>
+          <p class="page-subtitle">Upload, analyze, and optimize your resume with AI</p>
+        </div>
+      </header>
+
+      <div class="resume-grid">
+        <!-- Upload Card -->
+        <div class="glass-card upload-card">
+          <div class="card-header"><h3>Upload Resume</h3></div>
+          <div class="drop-zone" id="drop-zone"
+            ondrop="handleDrop(event)"
+            ondragover="handleDragOver(event)"
+            ondragleave="handleDragLeave(event)">
+            <div class="drop-icon">📂</div>
+            <h4>Drag & Drop your resume here</h4>
+            <p>Supports PDF, DOCX, TXT, Markdown</p>
+            <label class="btn-secondary" for="resume-file-input" style="cursor:pointer;">Browse Files</label>
+            <input type="file" id="resume-file-input" accept=".pdf,.docx,.txt,.md" class="hidden" onchange="handleFileSelect(event)" />
+          </div>
+          <div class="upload-progress hidden" id="upload-progress">
+            <div class="progress-track"><div class="progress-fill" id="upload-bar" style="width: 0%"></div></div>
+            <span id="upload-status">Uploading…</span>
+          </div>
+        </div>
+
+        <!-- ATS Score Card -->
+        <div class="glass-card ats-card">
+          <div class="card-header">
+            <h3>ATS Analysis</h3>
+            <span class="card-badge cyan" id="ats-status-badge">No Resume</span>
+          </div>
+          <div class="ats-display" id="ats-display">
+            <div class="big-gauge">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+                <circle cx="60" cy="60" r="48" fill="none" stroke="url(#gauge-gradient)" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="0 301.6" id="ats-gauge-circle"
+                  style="transform: rotate(-90deg); transform-origin: center;" />
+                <text x="60" y="55" text-anchor="middle" class="gauge-value" id="ats-gauge-value">—</text>
+                <text x="60" y="72" text-anchor="middle" class="gauge-label">ATS Score</text>
+                <defs>
+                  <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#7c3aed"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <p class="ats-placeholder">Upload a resume to see your ATS compatibility score</p>
+          </div>
+        </div>
+
+        <!-- Skills Extracted -->
+        <div class="glass-card skills-extracted-card">
+          <div class="card-header"><h3>Extracted Skills</h3></div>
+          <div class="skills-cloud" id="skills-cloud">
+            <p class="placeholder-text">Skills will appear after resume upload</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Resume Feedback -->
+      <div class="glass-card feedback-card" id="resume-feedback-card">
+        <div class="card-header">
+          <h3>AI Resume Feedback</h3>
+          <button class="btn-secondary small" id="analyze-btn" onclick="analyzeResume()">Analyze with AI</button>
+        </div>
+        <div class="feedback-body" id="feedback-body">
+          <p class="placeholder-text">Upload a resume then click "Analyze with AI" to receive detailed improvement recommendations.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: INTERVIEW ── -->
+    <div class="view hidden" id="view-interview">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Mock Interview</h1>
+          <p class="page-subtitle">Real-time AI-powered interview practice</p>
+        </div>
+        <div class="interview-status" id="interview-status-bar">
+          <span class="status-dot idle" id="status-dot"></span>
+          <span id="status-label">Not Started</span>
+        </div>
+      </header>
+
+      <div class="interview-layout">
+        <!-- Setup Panel -->
+        <div class="glass-card interview-setup" id="interview-setup">
+          <h3>Interview Setup</h3>
+          <div class="form-group">
+            <label for="interview-role">Target Role</label>
+            <input type="text" id="interview-role" placeholder="e.g. Senior Software Engineer" value="Software Engineer" />
+          </div>
+          <div class="form-group">
+            <label for="interview-company">Company (optional)</label>
+            <input type="text" id="interview-company" placeholder="e.g. Google, Microsoft" />
+          </div>
+          <div class="form-group">
+            <label for="interview-type">Focus Area</label>
+            <select id="interview-type">
+              <option value="mixed">Mixed (Technical + Behavioral)</option>
+              <option value="technical">Technical Only</option>
+              <option value="behavioral">Behavioral Only</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="startInterview()" id="start-interview-btn">
+            Start Interview Session
+          </button>
+        </div>
+
+        <!-- Interview Session Panel -->
+        <div class="glass-card interview-session hidden" id="interview-session">
+          <div class="interview-header">
+            <div class="question-counter">
+              Question <span id="q-current">1</span> / <span id="q-total">5</span>
+            </div>
+            <button class="btn-secondary small" onclick="endInterview()">End Session</button>
+          </div>
+
+          <div class="question-area" id="question-area">
+            <div class="question-type-badge" id="q-type-badge">Loading…</div>
+            <div class="question-text" id="question-text">Connecting to interviewer…</div>
+          </div>
+
+          <div class="answer-area">
+            <label>Your Answer</label>
+            <textarea id="answer-input" placeholder="Type your answer here…" rows="5"></textarea>
+            <div class="answer-actions">
+              <button class="btn-secondary" onclick="clearAnswer()">Clear</button>
+              <button class="btn-primary" onclick="submitAnswer()" id="submit-answer-btn">Submit Answer</button>
+            </div>
+          </div>
+
+          <div class="feedback-area hidden" id="interview-feedback">
+            <div class="feedback-scores" id="feedback-scores"></div>
+            <div class="feedback-text" id="feedback-text"></div>
+          </div>
+        </div>
+
+        <!-- Session Summary -->
+        <div class="glass-card session-summary hidden" id="session-summary">
+          <div class="summary-header">
+            <div class="trophy-icon">🏆</div>
+            <h3>Session Complete!</h3>
+          </div>
+          <div class="summary-scores" id="summary-scores"></div>
+          <button class="btn-primary" onclick="restartInterview()">New Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: ROADMAP ── -->
+    <div class="view hidden" id="view-roadmap">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Learning Roadmap</h1>
+          <p class="page-subtitle">Your personalized path to career goals</p>
+        </div>
+        <button class="btn-primary" onclick="generateRoadmap()">Generate New Roadmap</button>
+      </header>
+
+      <div class="roadmap-layout">
+        <div class="glass-card roadmap-card">
+          <div class="roadmap-timeline" id="roadmap-timeline">
+            <div class="loading-shimmer">Loading your roadmap…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: APPLICATIONS ── -->
+    <div class="view hidden" id="view-applications">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Application Tracker</h1>
+          <p class="page-subtitle">Track every job application in one place</p>
+        </div>
+        <button class="btn-primary" onclick="openAddApplication()">+ Add Application</button>
+      </header>
+
+      <div class="glass-card">
+        <div class="app-kanban" id="app-kanban">
+          <div class="loading-shimmer">Loading applications…</div>
+        </div>
+      </div>
+
+      <!-- Add Application Modal -->
+      <div class="modal-overlay hidden" id="add-app-modal">
+        <div class="glass-card modal-card">
+          <div class="modal-header">
+            <h3>Add Application</h3>
+            <button class="close-btn" onclick="closeAddApplication()">✕</button>
+          </div>
+          <form onsubmit="submitApplication(event)">
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" id="app-company" placeholder="e.g. OpenAI" required />
+            </div>
+            <div class="form-group">
+              <label>Job Title</label>
+              <input type="text" id="app-title" placeholder="e.g. ML Engineer" required />
+            </div>
+            <div class="form-group">
+              <label>Job URL</label>
+              <input type="url" id="app-url" placeholder="https://…" />
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <textarea id="app-notes" rows="3" placeholder="Any notes about this application…"></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" onclick="closeAddApplication()">Cancel</button>
+              <button type="submit" class="btn-primary">Add Application</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================== TOAST ============================== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

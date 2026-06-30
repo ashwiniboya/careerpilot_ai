@@ -1,0 +1,52 @@
+# CareerPilot AI Configuration File
+
+models:
+  orchestrator:
+    name: "gemini-2.5-pro"
+    temperature: 0.2
+    top_p: 0.95
+    max_output_tokens: 8192
+  critic:
+    name: "gemini-2.5-pro"
+    temperature: 0.1
+    top_p: 0.9
+    max_output_tokens: 4096
+  default_subagent:
+    name: "gemini-2.5-flash"
+    temperature: 0.3
+    top_p: 0.95
+    max_output_tokens: 4096
+  embedding:
+    name: "text-embedding-004"
+
+agent_settings:
+  resume_agent:
+    model: "gemini-2.5-flash"
+    temperature: 0.2
+  ats_agent:
+    model: "gemini-2.5-flash"
+    temperature: 0.1
+  interview_agent:
+    model: "gemini-2.5-pro"
+    temperature: 0.4
+  roadmap_agent:
+    model: "gemini-2.5-pro"
+    temperature: 0.2
+  app_agent:
+    model: "gemini-2.5-flash"
+    temperature: 0.3
+
+rag:
+  chunk_size: 800
+  chunk_overlap: 100
+  vector_db_path: "vector_db"
+  similarity_threshold: 0.6
+  max_results: 5
+
+database:
+  url: "sqlite:///data/careerpilot.db"
+  echo: false
+
+auth:
+  algorithm: "HS256"
+  access_token_expire_minutes: 1440

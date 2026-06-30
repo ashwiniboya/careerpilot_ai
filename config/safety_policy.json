@@ -1,0 +1,42 @@
+{
+  "safety_policy": {
+    "version": "1.0",
+    "deny_by_default": true,
+    "allowed_actions": [
+      "read_file",
+      "write_file",
+      "query_database",
+      "web_search"
+    ],
+    "file_system": {
+      "allowed_roots": [
+        "c:/Users/user/Documents/careerpilot_ai"
+      ],
+      "blocked_extensions": [
+        ".exe",
+        ".bat",
+        ".sh",
+        ".py",
+        ".db"
+      ],
+      "write_restricted_dirs": [
+        "config",
+        "database",
+        "src"
+      ]
+    },
+    "network": {
+      "allow_all_domains": false,
+      "allowed_domains": [
+        "google.com",
+        "github.com",
+        "linkedin.com",
+        "adzuna.com",
+        "serpapi.com"
+      ]
+    },
+    "process": {
+      "allow_subprocess": false
+    }
+  }
+}
