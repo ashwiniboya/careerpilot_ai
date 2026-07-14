@@ -9,9 +9,9 @@ Endpoints:
 from __future__ import annotations
 
 import json
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from pydantic import BaseModel
@@ -19,9 +19,26 @@ from sqlalchemy.orm import Session
 
 from database.connection import get_db
 from database.models import User
-from src.api.auth import get_current_user
+from src.api.auth import get_current_user, _get_user_by_email, SECRET_KEY, ALGORITHM
 
 router = APIRouter(tags=["chat"])
+
+
+# ---------------------------------------------------------------------------
+# WebSocket auth helper
+# ---------------------------------------------------------------------------
+
+def _ws_authenticate(token: str, db: Session) -> Optional[User]:
+    """Validate JWT token for WebSocket connections (query param auth)."""
+    try:
+        from jose import JWTError, jwt
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if not email:
+            return None
+        return _get_user_by_email(db, email)
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -120,10 +137,13 @@ async def chat_sync(
 async def websocket_interview(
     websocket: WebSocket,
     session_id: str,
+    token: Optional[str] = Query(default=None, description="JWT access token for authentication"),
     db: Session = Depends(get_db),
 ):
     """
     Stateful WebSocket mock interview session.
+
+    Authentication: pass ?token=<JWT> as a query parameter.
 
     Protocol:
       1. Client connects and sends: {"action": "start", "target_role": "...", "company": "..."}
@@ -132,8 +152,17 @@ async def websocket_interview(
       4. Server evaluates and sends next question or session summary.
       5. Session ends when all questions complete or client disconnects.
     """
+    # Authenticate before accepting
+    if not token:
+        await websocket.close(code=1008, reason="Missing authentication token")
+        return
+    user = _ws_authenticate(token, db)
+    if user is None:
+        await websocket.close(code=1008, reason="Invalid or expired token")
+        return
+
     await websocket.accept()
-    logger.info(f"[ws/interview] Client connected: session={session_id}")
+    logger.info(f"[ws/interview] Authenticated user {user.id} connected: session={session_id}")
 
     interview_agent = None
     question_count = 0

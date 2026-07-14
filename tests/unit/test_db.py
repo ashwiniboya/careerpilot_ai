@@ -1,5 +1,6 @@
 import datetime
 from database.models import User, UserProfile, Resume, CareerHistory, SkillTracking
+from src.api.auth import _hash_password, _verify_password
 
 def test_create_user_and_profile(db_session):
     # 1. Create a user
@@ -93,3 +94,12 @@ def test_skills_assessment(db_session):
     skills_dict = {s.skill_name: s.current_proficiency for s in user.skills}
     assert skills_dict["Python"] == 3
     assert skills_dict["System Design"] == 2
+
+
+def test_password_hashing_and_verification_work():
+    password = "secret123"
+    hashed = _hash_password(password)
+
+    assert hashed != password
+    assert _verify_password(password, hashed) is True
+    assert _verify_password("wrong-password", hashed) is False

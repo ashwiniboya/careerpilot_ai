@@ -27,7 +27,11 @@ EXPOSE 8000
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 ENV ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=8000
 
-# Run uvicorn server via python main entry-point
-CMD ["python", "src/main.py"]
+# Run uvicorn directly (best practice: not via python src/main.py)
+# Supports graceful shutdown signals and container orchestrator compatibility
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--log-level", "info"]

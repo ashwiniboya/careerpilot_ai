@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Ensure the project root is on sys.path
@@ -36,6 +37,45 @@ from src.monitoring.logger import _configure_logger
 # ---------------------------------------------------------------------------
 _configure_logger()
 
+
+# ---------------------------------------------------------------------------
+# Lifespan (replaces deprecated @app.on_event)
+# ---------------------------------------------------------------------------
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup and shutdown logic."""
+    logger.info("CareerPilot AI starting up…")
+    # Initialise database tables
+    try:
+        from database.init_db import init_db
+        init_db()
+        logger.info("Database initialised successfully.")
+    except Exception as e:
+        logger.error(f"Database init failed: {e}")
+
+    # Verify API key presence (non-fatal — offline mode still works)
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        logger.warning(
+            "GEMINI_API_KEY not set. LLM features will run in offline/stub mode. "
+            "Set the key in .env to enable full AI capabilities."
+        )
+    else:
+        logger.info("GEMINI_API_KEY detected. AI features are enabled.")
+
+    # Warn if JWT_SECRET is still the insecure development default
+    jwt_secret = os.getenv("JWT_SECRET", "")
+    if not jwt_secret or jwt_secret in ("change-me-in-production-please", "supersecretjwtkeyforlocaldevelopment123!"):
+        logger.warning(
+            "JWT_SECRET is unset or using an insecure default. "
+            "Generate a strong secret with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+
+    yield  # Application runs here
+
+    logger.info("CareerPilot AI shutting down.")
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
@@ -50,6 +90,7 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
+    lifespan=lifespan,
 )
 
 # ---------------------------------------------------------------------------
@@ -102,32 +143,6 @@ if FRONTEND_DIR.exists():
 # Startup / shutdown events
 # ---------------------------------------------------------------------------
 
-@app.on_event("startup")
-async def on_startup():
-    logger.info("CareerPilot AI starting up…")
-    # Initialise database tables
-    try:
-        from database.init_db import init_db
-        init_db()
-        logger.info("Database initialised successfully.")
-    except Exception as e:
-        logger.error(f"Database init failed: {e}")
-
-    # Verify API key presence (non-fatal — offline mode still works)
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
-        logger.warning(
-            "GEMINI_API_KEY not set. LLM features will run in offline/stub mode. "
-            "Set the key in .env to enable full AI capabilities."
-        )
-    else:
-        logger.info("GEMINI_API_KEY detected. AI features are enabled.")
-
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    logger.info("CareerPilot AI shutting down.")
-
 
 # ---------------------------------------------------------------------------
 # Health check
@@ -136,7 +151,26 @@ async def on_shutdown():
 @app.get("/health", tags=["system"])
 def health_check():
     """Simple liveness probe for Docker/k8s."""
-    return {"status": "ok", "service": "careerpilot-ai"}
+    import datetime
+    return {
+        "status": "ok",
+        "service": "careerpilot-ai",
+        "version": app.version,
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    }
+
+
+@app.get("/ready", tags=["system"])
+def readiness_check():
+    """Readiness probe — verifies DB is accessible."""
+    try:
+        from database.connection import engine
+        with engine.connect() as conn:
+            conn.execute(__import__("sqlalchemy").text("SELECT 1"))
+        return {"status": "ready", "db": "ok"}
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail=f"DB not ready: {e}")
 
 
 # ---------------------------------------------------------------------------

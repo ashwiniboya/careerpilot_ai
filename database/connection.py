@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 
@@ -24,8 +24,19 @@ if DATABASE_URL.startswith("sqlite"):
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    echo=os.getenv("SQL_ECHO", "False").lower() in ("true", "1", "yes")
+    echo=os.getenv("SQL_ECHO", "False").lower() in ("true", "1", "yes"),
+    pool_pre_ping=True,  # Detect stale connections
 )
+
+# Enable WAL mode for SQLite — allows concurrent reads during writes
+# This prevents "database is locked" errors under parallel WebSocket sessions
+if DATABASE_URL.startswith("sqlite"):
+    @event.listens_for(engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

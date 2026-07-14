@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone as _tz
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime, Date, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from database.connection import Base
@@ -10,8 +11,8 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc), onupdate=lambda: datetime.datetime.now(_tz.utc))
 
     # Relationships
     profiles = relationship("UserProfile", back_populates="user", cascade="all, delete-orphan")
@@ -35,7 +36,7 @@ class UserProfile(Base):
     experience_level = Column(String, nullable=True)
     target_salary = Column(Float, nullable=True)
     preferences = Column(JSON, nullable=True)  # Store user settings, preferences as JSON
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc), onupdate=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="profiles")
 
@@ -51,7 +52,7 @@ class Resume(Base):
     content_markdown = Column(Text, nullable=True)
     parsed_data = Column(JSON, nullable=True)  # Structured JSON (skills, experience, etc.)
     last_ats_score = Column(Float, default=0.0)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="resumes")
     versions = relationship("ResumeVersion", back_populates="resume", cascade="all, delete-orphan")
@@ -65,7 +66,7 @@ class ResumeVersion(Base):
     version_num = Column(Integer, nullable=False)
     content_markdown = Column(Text, nullable=False)
     changes_made = Column(JSON, nullable=True)  # Description of edits made by agents
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
 
     resume = relationship("Resume", back_populates="versions")
 
@@ -91,7 +92,7 @@ class InterviewHistory(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     target_role = Column(String, nullable=False)
-    date_conducted = Column(DateTime, default=datetime.datetime.utcnow)
+    date_conducted = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
     overall_score = Column(Float, default=0.0)
     performance_feedback = Column(JSON, nullable=True)  # Detail comments per category
     transcript = Column(JSON, nullable=True)  # Q&A conversation history
@@ -108,7 +109,7 @@ class SkillTracking(Base):
     category = Column(String, nullable=True)  # Technical, Soft Skill, Domain
     current_proficiency = Column(Integer, default=1)  # 1 to 5
     target_proficiency = Column(Integer, default=5)   # 1 to 5
-    last_assessed_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    last_assessed_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc), onupdate=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="skills")
 
@@ -122,7 +123,7 @@ class Roadmap(Base):
     current_step = Column(Integer, default=1)
     total_steps = Column(Integer, default=0)
     status = Column(String, default="active")  # active, completed, paused
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="roadmaps")
     steps = relationship("RoadmapStep", back_populates="roadmap", cascade="all, delete-orphan")
@@ -152,7 +153,7 @@ class JobApplication(Base):
     job_title = Column(String, nullable=False)
     job_description = Column(Text, nullable=True)
     status = Column(String, default="applied")  # applied, interviewing, offered, rejected
-    applied_at = Column(DateTime, default=datetime.datetime.utcnow)
+    applied_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
     tailored_cover_letter = Column(Text, nullable=True)
     url = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
@@ -168,7 +169,7 @@ class Memory(Base):
     memory_type = Column(String, index=True, nullable=False)  # short_term, long_term, preference, goal
     key = Column(String, index=True, nullable=False)
     val = Column(JSON, nullable=True)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc), onupdate=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="memories")
 
@@ -182,6 +183,6 @@ class TokenUsage(Base):
     prompt_tokens = Column(Integer, default=0)
     completion_tokens = Column(Integer, default=0)
     cost = Column(Float, default=0.0)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.datetime.now(_tz.utc))
 
     user = relationship("User", back_populates="token_usage")

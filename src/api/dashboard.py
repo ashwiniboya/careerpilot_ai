@@ -201,12 +201,20 @@ def update_roadmap_step(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     import datetime
+    from datetime import timezone
     step = db.query(RoadmapStep).filter(RoadmapStep.id == step_id).first()
     if not step:
         raise HTTPException(status_code=404, detail="Step not found")
+    # Authorization check: verify this step's roadmap belongs to the current user
+    roadmap = db.query(Roadmap).filter(
+        Roadmap.id == step.roadmap_id,
+        Roadmap.user_id == current_user.id,
+    ).first()
+    if not roadmap:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this step")
     step.status = payload.status
     if payload.status == "completed":
-        step.completed_at = datetime.datetime.utcnow()
+        step.completed_at = datetime.datetime.now(timezone.utc)
     db.commit()
     return {"status": "updated", "step_id": step_id, "new_status": payload.status}
 
@@ -244,13 +252,14 @@ def create_application(
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
     import datetime
+    from datetime import timezone
     app = JobApplication(
         user_id=current_user.id,
         company_name=payload.company_name,
         job_title=payload.job_title,
         job_description=payload.job_description,
         status="Applied",
-        applied_at=datetime.datetime.utcnow(),
+        applied_at=datetime.datetime.now(timezone.utc),
         url=payload.url,
         notes=payload.notes,
     )
@@ -272,6 +281,7 @@ async def upload_resume(
 ) -> Dict[str, Any]:
     """Upload a resume file (PDF, DOCX, TXT, MD). Parses, scores, and stores it."""
     import datetime
+    from datetime import timezone
 
     # Validate file type
     allowed = {".pdf", ".docx", ".txt", ".md"}
@@ -292,14 +302,15 @@ async def upload_resume(
         f.write(content_bytes)
 
     # Parse resume
+    raw_text = ""
+    skills: list = []
     try:
         from custom_mcp.tools.resume_tools import parse_resume_content
         parsed = parse_resume_content(str(dest))
-        raw_text = parsed.get("raw_text", "")
+        raw_text = parsed.get("raw_content", "") or ""
         skills = parsed.get("skills", [])
     except Exception as e:
         logger.warning(f"[resume upload] Parse error: {e}")
-        raw_text, skills = "", []
 
     # ATS pre-score (placeholder — requires JD)
     ats_score = 0.0
@@ -313,7 +324,7 @@ async def upload_resume(
         content_markdown=raw_text,
         parsed_data={"skills": skills},
         last_ats_score=ats_score,
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.datetime.now(timezone.utc),
     )
     db.add(resume)
     db.commit()
